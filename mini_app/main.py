@@ -16,10 +16,14 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from dotenv import load_dotenv
 
-# Импорты для нумерологии
+# Импорты для нумерологии: при rootDir=mini_app на Render есть только mini_app/numerology
 import sys
-numerology_path = Path(__file__).resolve().parent.parent / "numerology"
-sys.path.insert(0, str(numerology_path))
+_base = Path(__file__).resolve().parent
+_numerology = _base / "numerology"
+if _numerology.exists():
+    sys.path.insert(0, str(_numerology))
+else:
+    sys.path.insert(0, str(_base.parent / "numerology"))
 
 from report_generator import (
     calculate_action_number,
@@ -460,5 +464,5 @@ async def download_file(filename: str):
 if __name__ == "__main__":
     import uvicorn
     # Amvera использует порт из переменной окружения PORT или 8080 по умолчанию
-    port = int(os.getenv("PORT", 8001))
+    port = int(os.getenv("PORT", 8080))
     uvicorn.run(app, host="0.0.0.0", port=port)

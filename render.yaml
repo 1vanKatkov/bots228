@@ -1,0 +1,28 @@
+# Render Blueprint: правильная конфигурация для bots228 (FastAPI)
+# Использование: Dashboard → New → Blueprint → подключите репозиторий, Render подхватит этот файл.
+
+services:
+  - type: web
+    name: bots228
+    runtime: python
+    region: oregon
+
+    # Репозиторий и ветка
+    repo: https://github.com/1vanKatkov/bots228
+    branch: main
+
+    # Корень приложения — папка mini_app
+    rootDir: mini_app
+
+    # Сборка: установка зависимостей
+    buildCommand: pip install -r requirements.txt
+
+    # Запуск FastAPI (не Static Site)
+    startCommand: python main.py
+
+    # Переменные задайте в Dashboard → Environment
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
