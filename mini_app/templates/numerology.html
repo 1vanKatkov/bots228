@@ -77,35 +77,37 @@
         tg.ready();
         tg.expand();
 
-        const initData = tg.initDataUnsafe;
-        const userId = initData?.user?.id;
+        const initDataRaw = tg.initData || '';
+        function getUserId() { return window.__telegramId || tg.initDataUnsafe?.user?.id; }
 
         async function loadBalance() {
-            if (!userId) return;
+            const uid = getUserId();
+            if (!initDataRaw && !uid) return;
             try {
                 const formData = new FormData();
-                formData.append('telegram_id', userId);
-                const response = await fetch('/api/balance', {
-                    method: 'POST',
-                    body: formData
-                });
+                if (initDataRaw) formData.append('init_data', initDataRaw);
+                if (uid) formData.append('telegram_id', String(uid));
+                const response = await fetch('/api/balance', { method: 'POST', body: formData });
                 const data = await response.json();
-                document.getElementById('balanceValue').textContent = data.balance || 0;
-            } catch (error) {
-                console.error('Error loading balance:', error);
-            }
+                if (response.ok && typeof data.balance === 'number') {
+                    document.getElementById('balanceValue').textContent = data.balance;
+                    if (data.telegram_id) window.__telegramId = data.telegram_id;
+                }
+            } catch (error) { console.error('Error loading balance:', error); }
         }
+
+        loadBalance();
 
         document.getElementById('numerologyForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
-            if (!userId) {
-                showError('Не удалось определить пользователя');
+            const uid = getUserId();
+            if (!uid) {
+                showError('Не удалось определить пользователя. Откройте приложение из бота.');
                 return;
             }
 
             const formData = new FormData(e.target);
-            formData.append('telegram_id', userId);
+            formData.append('telegram_id', uid);
 
             const submitBtn = document.getElementById('submitBtn');
             const originalText = submitBtn.querySelector('.button-text').textContent;

@@ -108,8 +108,8 @@
         tg.ready();
         tg.expand();
 
-        const initData = tg.initDataUnsafe;
-        const userId = initData?.user?.id;
+        const initDataRaw = tg.initData || '';
+        function getUserId() { return window.__telegramId || tg.initDataUnsafe?.user?.id; }
 
         const thinkingMessages = [
             '💫 Читаю узоры вашей совместной судьбы...',
@@ -129,13 +129,18 @@
         });
 
         async function loadBalance() {
-            if (!userId) return;
+            const uid = getUserId();
+            if (!initDataRaw && !uid) return;
             try {
                 const formData = new FormData();
-                formData.append('telegram_id', userId);
+                if (initDataRaw) formData.append('init_data', initDataRaw);
+                if (uid) formData.append('telegram_id', String(uid));
                 const response = await fetch('/api/balance', { method: 'POST', body: formData });
                 const data = await response.json();
-                document.getElementById('balanceValue').textContent = data.balance ?? 0;
+                if (response.ok && typeof data.balance === 'number') {
+                    document.getElementById('balanceValue').textContent = data.balance;
+                    if (data.telegram_id) window.__telegramId = data.telegram_id;
+                }
             } catch (e) { console.error(e); }
         }
 
@@ -153,12 +158,15 @@
             if (text) text.textContent = loading ? 'Обрабатываю...' : 'Узнать совместимость';
         }
 
+        loadBalance();
+
         document.getElementById('formNamesDates').addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (!userId) { showError('Не удалось определить пользователя'); return; }
+            const uid = getUserId();
+            if (!uid) { showError('Не удалось определить пользователя. Откройте приложение из бота.'); return; }
             const form = e.target;
             const formData = new FormData(form);
-            formData.append('telegram_id', userId);
+            formData.append('telegram_id', uid);
             const btn = document.getElementById('submitNamesDates');
             setLoading(btn, true);
             document.getElementById('error').style.display = 'none';
@@ -190,10 +198,11 @@
 
         document.getElementById('formNamesOnly').addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (!userId) { showError('Не удалось определить пользователя'); return; }
+            const uid = getUserId();
+            if (!uid) { showError('Не удалось определить пользователя. Откройте приложение из бота.'); return; }
             const form = e.target;
             const formData = new FormData(form);
-            formData.append('telegram_id', userId);
+            formData.append('telegram_id', uid);
             const btn = document.getElementById('submitNamesOnly');
             setLoading(btn, true);
             document.getElementById('error').style.display = 'none';
@@ -223,7 +232,6 @@
             }
         });
 
-        if (userId) loadBalance();
     </script>
 </body>
 </html>

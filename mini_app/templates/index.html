@@ -57,20 +57,20 @@
         tg.ready();
         tg.expand();
 
-        // Получение данных пользователя
-        const initData = tg.initDataUnsafe;
-        const userId = initData?.user?.id;
+        // Получение данных: initData (сырая строка) всегда отправляем на бэкенд — он валидирует и достаёт user id
+        const initDataRaw = tg.initData || '';
+        const userId = tg.initDataUnsafe?.user?.id;
 
-        // Загрузка баланса
         async function loadBalance() {
-            if (!userId) {
+            if (!initDataRaw && !userId) {
                 document.getElementById('balanceValue').textContent = '—';
                 return;
             }
 
             try {
                 const formData = new FormData();
-                formData.append('telegram_id', userId);
+                if (initDataRaw) formData.append('init_data', initDataRaw);
+                if (userId) formData.append('telegram_id', String(userId));
                 
                 const response = await fetch('/api/balance', {
                     method: 'POST',
@@ -78,14 +78,24 @@
                 });
                 
                 const data = await response.json();
-                document.getElementById('balanceValue').textContent = data.balance || 0;
+                if (response.ok && typeof data.balance === 'number') {
+                    document.getElementById('balanceValue').textContent = data.balance;
+                    if (data.telegram_id) window.__telegramId = data.telegram_id;
+                } else {
+                    document.getElementById('balanceValue').textContent = '—';
+                }
             } catch (error) {
                 console.error('Error loading balance:', error);
+                document.getElementById('balanceValue').textContent = '—';
             }
         }
 
-        if (userId) {
+        // Запрашиваем баланс после готовности WebApp (initData уже есть при открытии из бота)
+        if (initDataRaw || userId) {
             loadBalance();
+        } else {
+            tg.onEvent('themeChanged', loadBalance);
+            setTimeout(loadBalance, 300);
         }
     </script>
 </body>

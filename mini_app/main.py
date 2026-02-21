@@ -3,10 +3,13 @@ import random
 import requests
 import logging
 import re
+import hmac
+import hashlib
+import json
 from datetime import datetime, date
 from pathlib import Path
 from typing import Optional
-from urllib.parse import urlparse, urlunparse
+from urllib.parse import urlparse, urlunparse, parse_qsl
 import asyncpg
 from contextlib import asynccontextmanager
 
@@ -60,6 +63,32 @@ MODEL_SOVMESTIMOST = "@preset/sovmestimost"
 
 STARTING_SPARKS = 100
 SPARK_COST = 5
+
+# Токен бота для Mini App (для валидации initData)
+TELEGRAM_BOT_TOKEN = os.getenv("ASTROLHUB_BOT_TOKEN") or os.getenv("TELEGRAM_BOT_TOKEN") or ""
+
+
+def _validate_telegram_init_data(init_data: str) -> Optional[int]:
+    """Проверяет initData от Telegram Web App и возвращает telegram_id пользователя или None."""
+    if not TELEGRAM_BOT_TOKEN or not init_data or not init_data.strip():
+        return None
+    try:
+        params = dict(parse_qsl(init_data, keep_blank_values=True))
+        hash_val = params.pop("hash", None)
+        if not hash_val:
+            return None
+        data_check = "\n".join(f"{k}={v}" for k, v in sorted(params.items()))
+        secret_key = hmac.new(b"WebAppData", TELEGRAM_BOT_TOKEN.encode(), hashlib.sha256).digest()
+        computed = hmac.new(secret_key, data_check.encode(), hashlib.sha256).hexdigest()
+        if not hmac.compare_digest(computed, hash_val):
+            return None
+        user_str = params.get("user")
+        if not user_str:
+            return None
+        user = json.loads(user_str)
+        return int(user.get("id"))
+    except (json.JSONDecodeError, ValueError, KeyError):
+        return None
 
 # --- Совместимость: числа экспрессии и жизненного пути ---
 RUSSIAN_LETTERS = {
@@ -242,10 +271,24 @@ async def compatibility_page(request: Request):
     return templates.TemplateResponse("compatibility.html", {"request": request})
 
 @app.post("/api/balance")
-async def get_balance(telegram_id: int = Form(...), username: Optional[str] = Form(default=None)):
-    """Возвращает баланс. При первом обращении создаёт пользователя с 100 искрами (для бота и мини-приложения)."""
-    balance = await get_or_create_user(telegram_id, username or None)
-    return JSONResponse({"balance": balance})
+async def get_balance(
+    telegram_id: Optional[str] = Form(default=None),
+    username: Optional[str] = Form(default=None),
+    init_data: Optional[str] = Form(default=None),
+):
+    """Возвращает баланс. При первом обращении создаёт пользователя с 100 искрами. Принимает telegram_id или init_data (для мини-приложения)."""
+    tid = None
+    if telegram_id and telegram_id.strip():
+        try:
+            tid = int(telegram_id.strip())
+        except ValueError:
+            pass
+    if tid is None and init_data and init_data.strip():
+        tid = _validate_telegram_init_data(init_data)
+    if tid is None:
+        return JSONResponse({"error": "telegram_id or valid init_data required", "balance": 0}, status_code=400)
+    balance = await get_or_create_user(tid, username or None)
+    return JSONResponse({"balance": balance, "telegram_id": tid})
 
 @app.post("/api/numerology/generate")
 async def generate_numerology_report(
