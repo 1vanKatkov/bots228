@@ -1,0 +1,50 @@
+# Конфигурация для Amvera
+# Документация: https://docs.amvera.ru/
+
+# Версия конфигурации
+version: 1
+
+# Настройки приложения
+app:
+  # Имя приложения (будет использовано в URL)
+  name: mini-app
+  
+  # Тип приложения
+  type: web
+  
+  # Команда запуска
+  start: uvicorn main:app --host 0.0.0.0 --port 8080
+  
+  # Переменные окружения (также можно настроить в веб-интерфейсе)
+  env:
+    - DATABASE_URL
+    - OPENROUTER_API_KEY
+  
+  # Порт приложения (Amvera использует порт 8080 по умолчанию)
+  port: 8080
+  
+  # Health check endpoint
+  healthcheck:
+    path: /
+    interval: 30s
+    timeout: 10s
+    retries: 3
+
+# Настройки сборки
+build:
+  # Версия Python
+  python_version: "3.11"
+  
+  # Команда установки зависимостей
+  install_command: pip install -r requirements.txt
+  
+  # Директория для сборки
+  build_dir: .
+
+# Настройки базы данных
+database:
+  # Тип базы данных
+  type: postgresql
+  
+  # Версия PostgreSQL
+  version: "16"

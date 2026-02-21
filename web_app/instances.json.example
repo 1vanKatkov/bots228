@@ -1,0 +1,30 @@
+{
+  "bot_number": {
+    "preset": "numerology_base1",
+    "token": "YOUR_BOT_TOKEN_FROM_BOTFATHER",
+    "comment": "Основной бот (Нумерология)",
+    "link": "https://t.me/your_bot",
+    "is_test": false
+  },
+  "bot_sonnik": {
+    "preset": "sonnik_base1",
+    "token": "YOUR_BOT_TOKEN_FROM_BOTFATHER",
+    "comment": "Основной бот (Сонник)",
+    "link": "https://t.me/your_bot",
+    "is_test": false
+  },
+  "bot_admin": {
+    "preset": "admin",
+    "token": "YOUR_ADMIN_BOT_TOKEN",
+    "comment": "Админка в тг",
+    "link": "https://t.me/your_admin_bot",
+    "is_test": false
+  },
+  "bot_sovmestimost": {
+    "preset": "sovmestimost_base1",
+    "token": "YOUR_BOT_TOKEN_FROM_BOTFATHER",
+    "comment": "Бот Совместимости",
+    "link": "https://t.me/your_bot",
+    "is_test": false
+  }
+}

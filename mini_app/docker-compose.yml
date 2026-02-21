@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: mini_app_postgres
+    environment:
+      POSTGRES_DB: mini_app_db
+      POSTGRES_USER: mini_app_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mini_app_user -d mini_app_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    container_name: mini_app_web
+    ports:
+      - "8001:8001"
+    environment:
+      DATABASE_URL: postgresql://mini_app_user:${POSTGRES_PASSWORD:-changeme}@postgres:5432/mini_app_db
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./../numerology/reports:/app/../numerology/reports
+
+volumes:
+  postgres_data:

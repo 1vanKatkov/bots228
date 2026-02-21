@@ -1,0 +1,13 @@
+Book1.csv
+.env
+.env.*
+!.env.example
+*.pyc
+__pycache__/
+logs/
+*.db
+*.sqlite
+*.sqlite3
+
+# Секреты: токены ботов и админки
+web_app/instances.json

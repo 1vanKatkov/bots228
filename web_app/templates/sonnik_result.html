@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Результат толкования</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #2c003e; color: white; padding: 40px; line-height: 1.6; }
+        .result-container { background-color: #4b0082; padding: 30px; border-radius: 15px; max-width: 800px; margin: 0 auto; text-align: left; }
+        h1 { text-align: center; color: #ffd700; }
+        .interpretation { white-space: pre-wrap; font-size: 18px; }
+        .back-button { display: block; text-align: center; margin-top: 30px; background-color: #ffd700; color: #2c003e; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; width: fit-content; margin-left: auto; margin-right: auto;}
+    </style>
+</head>
+<body>
+    <div class="result-container">
+        <h1>Толкование вашего сна</h1>
+        <div class="interpretation">{{ interpretation }}</div>
+        <a href="/sonnik" class="back-button">Разгадать еще один сон</a>
+    </div>
+</body>
+</html>

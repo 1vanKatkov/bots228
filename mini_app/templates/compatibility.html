@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#2D1B4E">
+    <title>Совместимость</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        .tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+        .tab { flex: 1; padding: 0.75rem; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-card); color: var(--text-secondary); text-align: center; cursor: pointer; font-size: 0.9rem; }
+        .tab.active { background: var(--accent); color: var(--bg-primary); border-color: var(--accent); }
+        .panel { display: none; }
+        .panel.active { display: block; }
+        .form-group label { display: block; margin-bottom: 0.35rem; color: var(--text-secondary); font-size: 0.9rem; }
+        .form-group input { width: 100%; padding: 0.75rem; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-primary); margin-bottom: 0.75rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <a href="/" class="back-button">← Назад</a>
+            <h1>💞 Совместимость</h1>
+            <div class="balance" id="balance">
+                <span class="spark-icon">💎</span>
+                <span id="balanceValue">—</span>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="form-section">
+                <p class="description">
+                    Узнайте совместимость двух людей по именам и датам рождения или только по именам.
+                </p>
+
+                <div class="tabs">
+                    <button type="button" class="tab active" data-panel="names_dates">Имена + даты</button>
+                    <button type="button" class="tab" data-panel="names_only">Только имена</button>
+                </div>
+
+                <div id="panel_names_dates" class="panel active">
+                    <form id="formNamesDates" class="form">
+                        <div class="form-group">
+                            <label for="name1">Имя первого человека</label>
+                            <input type="text" id="name1" name="name1" placeholder="Например: Иван" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="date1">Дата рождения (ДД.ММ.ГГГГ)</label>
+                            <input type="text" id="date1" name="date1" placeholder="15.04.1985" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="name2">Имя второго человека</label>
+                            <input type="text" id="name2" name="name2" placeholder="Например: Мария" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="date2">Дата рождения (ДД.ММ.ГГГГ)</label>
+                            <input type="text" id="date2" name="date2" placeholder="22.07.1992" required>
+                        </div>
+                        <button type="submit" class="submit-button" id="submitNamesDates">
+                            <span class="button-text">Узнать совместимость</span>
+                            <span class="button-cost">5 искр</span>
+                        </button>
+                    </form>
+                </div>
+
+                <div id="panel_names_only" class="panel">
+                    <form id="formNamesOnly" class="form">
+                        <div class="form-group">
+                            <label for="nameOnly1">Первое имя</label>
+                            <input type="text" id="nameOnly1" name="name1" placeholder="Иван" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="nameOnly2">Второе имя</label>
+                            <input type="text" id="nameOnly2" name="name2" placeholder="Мария" required>
+                        </div>
+                        <button type="submit" class="submit-button" id="submitNamesOnly">
+                            <span class="button-text">Узнать совместимость</span>
+                            <span class="button-cost">5 искр</span>
+                        </button>
+                    </form>
+                </div>
+
+                <div id="thinking" class="thinking-section" style="display: none;">
+                    <div class="thinking-message">
+                        <div class="thinking-icon">✨</div>
+                        <p id="thinkingText">Читаю узоры вашей совместной судьбы...</p>
+                    </div>
+                </div>
+
+                <div id="result" class="result-section" style="display: none;">
+                    <div class="interpretation">
+                        <h3>Анализ совместимости:</h3>
+                        <div id="interpretationText" class="interpretation-text"></div>
+                    </div>
+                    <button type="button" onclick="location.reload()" class="submit-button">
+                        <span class="button-text">Узнать ещё раз</span>
+                    </button>
+                </div>
+
+                <div id="error" class="error-message" style="display: none;"></div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+
+        const initData = tg.initDataUnsafe;
+        const userId = initData?.user?.id;
+
+        const thinkingMessages = [
+            '💫 Читаю узоры вашей совместной судьбы...',
+            '🌹 Прислушиваюсь к музыке ваших душ...',
+            '🔮 Вглядываюсь в карту ваших сердечных путей...',
+            '✨ Созерцаю танец ваших душ...'
+        ];
+
+        document.querySelectorAll('.tab').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById('panel_' + btn.dataset.panel).classList.add('active');
+                document.getElementById('error').style.display = 'none';
+            });
+        });
+
+        async function loadBalance() {
+            if (!userId) return;
+            try {
+                const formData = new FormData();
+                formData.append('telegram_id', userId);
+                const response = await fetch('/api/balance', { method: 'POST', body: formData });
+                const data = await response.json();
+                document.getElementById('balanceValue').textContent = data.balance ?? 0;
+            } catch (e) { console.error(e); }
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('error');
+            el.textContent = msg;
+            el.style.display = 'block';
+            tg.HapticFeedback.notificationOccurred('error');
+        }
+
+        function setLoading(btn, loading) {
+            if (!btn) return;
+            btn.disabled = loading;
+            const text = btn.querySelector('.button-text');
+            if (text) text.textContent = loading ? 'Обрабатываю...' : 'Узнать совместимость';
+        }
+
+        document.getElementById('formNamesDates').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!userId) { showError('Не удалось определить пользователя'); return; }
+            const form = e.target;
+            const formData = new FormData(form);
+            formData.append('telegram_id', userId);
+            const btn = document.getElementById('submitNamesDates');
+            setLoading(btn, true);
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('thinking').style.display = 'block';
+            document.getElementById('thinkingText').textContent = thinkingMessages[Math.floor(Math.random() * thinkingMessages.length)];
+            try {
+                const response = await fetch('/api/compatibility/names_dates', { method: 'POST', body: formData });
+                const data = await response.json();
+                document.getElementById('thinking').style.display = 'none';
+                setLoading(btn, false);
+                if (data.error) {
+                    showError(data.error);
+                    return;
+                }
+                if (data.success) {
+                    document.getElementById('interpretationText').textContent = data.interpretation;
+                    document.getElementById('result').style.display = 'block';
+                    document.getElementById('balanceValue').textContent = data.balance;
+                    tg.HapticFeedback.notificationOccurred('success');
+                }
+            } catch (err) {
+                document.getElementById('thinking').style.display = 'none';
+                setLoading(btn, false);
+                showError('Ошибка при запросе');
+                console.error(err);
+            }
+        });
+
+        document.getElementById('formNamesOnly').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!userId) { showError('Не удалось определить пользователя'); return; }
+            const form = e.target;
+            const formData = new FormData(form);
+            formData.append('telegram_id', userId);
+            const btn = document.getElementById('submitNamesOnly');
+            setLoading(btn, true);
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('thinking').style.display = 'block';
+            document.getElementById('thinkingText').textContent = thinkingMessages[Math.floor(Math.random() * thinkingMessages.length)];
+            try {
+                const response = await fetch('/api/compatibility/names_only', { method: 'POST', body: formData });
+                const data = await response.json();
+                document.getElementById('thinking').style.display = 'none';
+                setLoading(btn, false);
+                if (data.error) {
+                    showError(data.error);
+                    return;
+                }
+                if (data.success) {
+                    document.getElementById('interpretationText').textContent = data.interpretation;
+                    document.getElementById('result').style.display = 'block';
+                    document.getElementById('balanceValue').textContent = data.balance;
+                    tg.HapticFeedback.notificationOccurred('success');
+                }
+            } catch (err) {
+                document.getElementById('thinking').style.display = 'none';
+                setLoading(btn, false);
+                showError('Ошибка при запросе');
+                console.error(err);
+            }
+        });
+
+        if (userId) loadBalance();
+    </script>
+</body>
+</html>

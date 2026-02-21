@@ -1,0 +1,113 @@
+{
+  "ru": {
+    "welcome": "Я помогаю расшифровать сны, как отражение внутреннего состояния и текущих жизненных процессов.\nБез шаблонов и сонников.\nТолько персональный разбор и понятные выводы.\n\nВ основе нашего бота лежит работа команды из более 15 профессиональных психологов и экспертов по анализу снов. Мы создали интеллектуальную систему, которая сочетает проверенные методики с современными алгоритмами ИИ. Просто опишите свой сон, и вы получите глубокое, многогранное толкование, помогающее понять скрытые послания вашего подсознания.",
+    "choose_language": "Выберите язык / Choose language / Elige el idioma:",
+    "main_menu": "📜 Получить отчет",
+    "buy_sparks": "💎 Купить Астральные Искр",
+    "prompt_name": "Введите ваше имя на кириллице (например: Иван).\n\nИмя нужно для расчета Числа Действия.",
+    "prompt_birthdate": "Теперь введите дату рождения в формате ДД.ММ.ГГГГ (например: 28.01.1991).",
+    "thinking": [
+      "🧮 Складываю вибрации вашего имени и даты...",
+      "📜 Перевожу цифры в смыслы, готовлю отчет...",
+      "✨ Подбираю тексты под ваши числа, чуть-чуть магии...",
+      "🔢 Проверяю расчеты, чтобы все сошлось идеально...",
+      "🪄 Собираю рекомендации по Числу Сознания и Действия..."
+    ],
+    "report_ready": "Ваш нумерологический отчет готов!",
+    "report_error": "Кажется, сейчас отчёт не собрался 🙏\nИногда системе нужно несколько секунд\nПопробуйте ещё раз - я всё подготовлю",
+    "sparks_deducted": "💎 Списано {cost} Астральных Искр. Осталось {remaining}.",
+    "insufficient_sparks": "💫 Чтобы получить отчет, нужно {cost} Астральных Искр, а на балансе меньше. Пополните баланс через меню и попробуйте снова.",
+    "back": "⬅️ Назад",
+    "learn_more": "🔍 Узнать больше о себе",
+    "purchase_title": "💎 *Покупка астральных искр* 💎\n\nВыберите количество искр для покупки:",
+    "payment_waiting": "💎 Для покупки перейдите по ссылке и после платежа нажмите «Я оплатил». Статус можно проверить кнопкой ниже.",
+    "check_payment": "🧾 Проверить снова",
+    "i_paid": "✅ Я оплатил",
+    "payment_success": "💰 Пополнение на {sparks} искр зачислено. Баланс: {balance} искр.",
+    "payment_already": "💰 Оплата уже зачислена ранее. Баланс: {balance} искр.",
+    "payment_pending": "Ожидаем оплату. Как только сменится статус, нажмите «Проверить снова».",
+    "payment_error": "Если это ошибка, напишите администратору.",
+    "invalid_name": "Пожалуйста, укажите имя на кириллице. Пример: Иван.",
+    "invalid_date": "Не удалось распознать дату. Введите в формате ДД.ММ.ГГГГ.",
+    "user_not_found": "Не получилось распознать пользователя. Попробуйте снова.",
+    "numerology_req_messages": [
+      "В ваших числах уже есть ответы на очень земные вопросы: про деньги, отношения и энергию, которая у вас в минусе\nЧасто именно они объясняют почему вроде стараешься - а с деньгами или отношениями всё равно сложно",
+      "Интересно, что одни и те же числа у кого-то дают спокойствие и опору, а у кого-то - постоянное напряжение и ощущение, что приходится всё тянуть на себе\n\nРазница - в том, как человек проживает свои числа"
+    ],
+    "back_to_menu_msg": "Вы можете получить еще один отчет или узнать больше о себе:"
+  },
+  "en": {
+    "welcome": "I help interpret dreams as a reflection of your internal state and current life processes.\nNo templates or generic dream books.\nOnly personal analysis and clear conclusions.\n\nOur bot is based on the work of a team of over 15 professional psychologists and dream analysis experts. We created an intelligent system that combines proven methods with modern AI algorithms. Just describe your dream, and you will receive a deep, multi-faceted interpretation that helps understand the hidden messages of your subconscious.",
+    "choose_language": "Choose language:",
+    "main_menu": "📜 Get report",
+    "buy_sparks": "💎 Buy Astral Sparks",
+    "prompt_name": "Enter your name (e.g., Ivan).\n\nThe name is needed to calculate the Action Number.",
+    "prompt_birthdate": "Now enter your date of birth in DD.MM.YYYY format (e.g., 28.01.1991).",
+    "thinking": [
+      "🧮 Calculating the vibrations of your name and date...",
+      "📜 Translating numbers into meanings, preparing report...",
+      "✨ Selecting texts for your numbers, a bit of magic...",
+      "🔢 Checking calculations so everything adds up perfectly...",
+      "🪄 Gathering recommendations for Consciousness and Action numbers..."
+    ],
+    "report_ready": "Your numerology report is ready!",
+    "report_error": "🌀 Failed to generate the report. Please try again or contact the administrator.",
+    "sparks_deducted": "💎 {cost} Astral Sparks deducted. {remaining} left.",
+    "insufficient_sparks": "💫 You need {cost} Astral Sparks to get a report, but your balance is lower. Top up your balance through the menu and try again.",
+    "back": "⬅️ Back",
+    "learn_more": "🔍 Learn more about yourself",
+    "purchase_title": "💎 *Purchase Astral Sparks* 💎\n\nChoose the amount of sparks to buy:",
+    "payment_waiting": "💎 To purchase, follow the link and click 'I paid' after payment. You can check the status with the button below.",
+    "check_payment": "🧾 Check again",
+    "i_paid": "✅ I paid",
+    "payment_success": "💰 Top-up of {sparks} sparks credited. Balance: {balance} sparks.",
+    "payment_already": "💰 Payment was already credited earlier. Balance: {balance} sparks.",
+    "payment_pending": "Waiting for payment. As soon as the status changes, click 'Check again'.",
+    "payment_error": "If this is an error, write to the administrator.",
+    "invalid_name": "Please enter a valid name.",
+    "invalid_date": "Could not recognize the date. Enter in DD.MM.YYYY format.",
+    "user_not_found": "Could not recognize user. Please try again.",
+    "numerology_req_messages": [
+      "In your numbers, there are already answers to very earthly questions: about money, relationships, and the energy you lack.\nOften they explain why you try hard - but it's still difficult with money or relationships.",
+      "Interestingly, the same numbers give someone calm and support, while for others - constant tension and the feeling of having to pull everything yourself.\nThe difference is in how a person lives their numbers."
+    ],
+    "back_to_menu_msg": "You can get another report or learn more about yourself:"
+  },
+  "es": {
+    "welcome": "Ayudo a interpretar los sueños как reflejo de su estado interno y procesos de vida actuales.\nSin plantillas ni libros de sueños genéricos.\nSolo análisis personal y conclusiones claras.\n\nNuestro bot se basa en el trabajo de un equipo de más de 15 psicólogos profesionales y expertos en análisis de sueños. Hemos creado un sistema inteligente que combina métodos probados con algoritmos modernos de IA. Simplemente describa su sueño y recibirá una interpretación profunda y multifacética que ayuda a comprender los mensajes ocultos de su subconsciente.",
+    "choose_language": "Elige el idioma:",
+    "main_menu": "📜 Obtener informe",
+    "buy_sparks": "💎 Comprar Chispas Astrales",
+    "prompt_name": "Ingrese su nombre (por ejemplo, Ivan).\n\nEl nombre es necesario para calcular el Número de Acción.",
+    "prompt_birthdate": "Ahora ingrese su fecha de nacimiento en formato DD.MM.AAAA (por ejemplo, 28.01.1991).",
+    "thinking": [
+      "🧮 Calculando las vibraciones de su nombre y fecha...",
+      "📜 Traduciendo números en significados, preparando el informe...",
+      "✨ Seleccionando textos para sus números, un poco de magia...",
+      "🔢 Verificando cálculos para que todo cuadre perfectamente...",
+      "🪄 Recopilando recomendaciones para los números de Conciencia y Acción..."
+    ],
+    "report_ready": "¡Su informe de numerología está listo!",
+    "report_error": "🌀 No se pudo generar el informe. Inténtelo de nuevo o contacte al administrador.",
+    "sparks_deducted": "💎 {cost} Chispas Astrales deducidas. Quedan {remaining}.",
+    "insufficient_sparks": "💫 Necesita {cost} Chispas Astrales para obtener un informe, pero su saldo es menor. Recargue su saldo a través del menú e inténtelo de nuevo.",
+    "back": "⬅️ Volver",
+    "learn_more": "🔍 Saber más sobre ti mismo",
+    "purchase_title": "💎 *Comprar Chispas Astrales* 💎\n\nElija la cantidad de chispas a comprar:",
+    "payment_waiting": "💎 Para comprar, siga el enlace y haga clic en 'He pagado' después del pago. Puede verificar el estado con el botón de abajo.",
+    "check_payment": "🧾 Verificar de nuevo",
+    "i_paid": "✅ He pagado",
+    "payment_success": "💰 Recarga de {sparks} chispas acreditada. Saldo: {balance} chispas.",
+    "payment_already": "💰 El pago ya fue acreditado anteriormente. Saldo: {balance} chispas.",
+    "payment_pending": "Esperando el pago. Tan pronto como cambie el estado, haga clic en 'Verificar de nuevo'.",
+    "payment_error": "Si esto es un error, escriba al administrador.",
+    "invalid_name": "Por favor, ingrese un nombre válido.",
+    "invalid_date": "No se pudo reconocer la fecha. Ingrese en formato DD.MM.AAAA.",
+    "user_not_found": "No se pudo reconocer al usuario. Inténtelo de nuevo.",
+    "numerology_req_messages": [
+      "En sus números ya hay respuestas a preguntas muy terrenales: sobre el dinero, las relaciones y la energía que le falta.\nA menudo explican por qué se esfuerza, pero sigue siendo difícil con el dinero o las relaciones.",
+      "Curiosamente, los mismos números le dan a alguien calma y apoyo, mientras que para otros, tensión constante y la sensación de tener que cargarlo todo uno mismo.\nLa diferencia está en cómo una persona vive sus números."
+    ],
+    "back_to_menu_msg": "Puede obtener otro informe o saber más sobre usted:"
+  }
+}

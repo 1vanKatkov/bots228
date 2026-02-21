@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#2D1B4E">
+    <title>Толкование снов</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <a href="/" class="back-button">← Назад</a>
+            <h1>🌙 Толкование снов</h1>
+            <div class="balance" id="balance">
+                <span class="spark-icon">💎</span>
+                <span id="balanceValue">—</span>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="form-section">
+                <p class="description">
+                    Опишите ваш сон, и я помогу понять его значение и скрытые послания подсознания.
+                </p>
+
+                <form id="sonnikForm" class="form">
+                    <div class="form-group">
+                        <label for="dreamText">Опишите ваш сон</label>
+                        <textarea 
+                            id="dreamText" 
+                            name="dreamText" 
+                            placeholder="Расскажите подробно, что вам приснилось..."
+                            rows="8"
+                            required
+                        ></textarea>
+                    </div>
+
+                    <button type="submit" class="submit-button" id="submitBtn">
+                        <span class="button-text">Расшифровать сон</span>
+                        <span class="button-cost">5 искр</span>
+                    </button>
+                </form>
+
+                <div id="thinking" class="thinking-section" style="display: none;">
+                    <div class="thinking-message">
+                        <div class="thinking-icon">✨</div>
+                        <p id="thinkingText">Обрабатываю ваш сон...</p>
+                    </div>
+                </div>
+
+                <div id="result" class="result-section" style="display: none;">
+                    <div class="interpretation">
+                        <h3>Толкование вашего сна:</h3>
+                        <div id="interpretationText" class="interpretation-text"></div>
+                    </div>
+                    <button onclick="location.reload()" class="submit-button">
+                        <span class="button-text">Расшифровать еще один сон</span>
+                    </button>
+                </div>
+
+                <div id="error" class="error-message" style="display: none;"></div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+
+        const initData = tg.initDataUnsafe;
+        const userId = initData?.user?.id;
+
+        async function loadBalance() {
+            if (!userId) return;
+            try {
+                const formData = new FormData();
+                formData.append('telegram_id', userId);
+                const response = await fetch('/api/balance', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                document.getElementById('balanceValue').textContent = data.balance || 0;
+            } catch (error) {
+                console.error('Error loading balance:', error);
+            }
+        }
+
+        document.getElementById('sonnikForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!userId) {
+                showError('Не удалось определить пользователя');
+                return;
+            }
+
+            const formData = new FormData(e.target);
+            formData.append('telegram_id', userId);
+
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.querySelector('.button-text').textContent;
+            submitBtn.disabled = true;
+            submitBtn.querySelector('.button-text').textContent = 'Обрабатываю...';
+
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('thinking').style.display = 'block';
+
+            try {
+                const response = await fetch('/api/sonnik/interpret', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                document.getElementById('thinking').style.display = 'none';
+
+                if (data.error) {
+                    showError(data.error);
+                    submitBtn.disabled = false;
+                    submitBtn.querySelector('.button-text').textContent = originalText;
+                    return;
+                }
+
+                if (data.success) {
+                    document.getElementById('interpretationText').textContent = data.interpretation;
+                    document.getElementById('result').style.display = 'block';
+                    document.getElementById('balanceValue').textContent = data.balance;
+                    tg.HapticFeedback.notificationOccurred('success');
+                }
+            } catch (error) {
+                document.getElementById('thinking').style.display = 'none';
+                showError('Ошибка при обработке сна');
+                console.error('Error:', error);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.querySelector('.button-text').textContent = originalText;
+            }
+        });
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            tg.HapticFeedback.notificationOccurred('error');
+        }
+
+        if (userId) {
+            loadBalance();
+        }
+    </script>
+</body>
+</html>

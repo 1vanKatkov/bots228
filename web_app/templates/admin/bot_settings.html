@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Настройки бота: {{ bot_id }}</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .back-link { margin-bottom: 20px; display: inline-block; color: #1877f2; text-decoration: none; font-weight: bold; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        h1 { margin-top: 0; color: #1c1e21; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-weight: bold; margin-bottom: 8px; color: #4b4f56; }
+        input[type="text"], textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-family: inherit; }
+        textarea { height: 100px; resize: vertical; }
+        .lang-tabs { display: flex; gap: 10px; margin-bottom: 20px; background: #e4e6eb; padding: 5px; border-radius: 10px; }
+        .tab { flex: 1; text-align: center; padding: 10px; text-decoration: none; color: #4b4f56; border-radius: 8px; font-weight: bold; }
+        .tab.active { background: white; color: #1877f2; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .btn-save { background: #1877f2; color: white; border: none; padding: 15px 30px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; }
+        .btn-save:hover { background: #166fe5; }
+        .field-desc { font-size: 13px; color: #8d949e; margin-bottom: 8px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/admin?token={{ token }}" class="back-link">← Вернуться к списку ботов</a>
+        
+        <div class="card">
+            <h1>Настройки: {{ bot_id }}</h1>
+            <p style="color: #65676b;">Пресет: <b>{{ preset_id }}</b></p>
+            
+            <form action="/admin/bot/update" method="post">
+                <input type="hidden" name="bot_id" value="{{ bot_id }}">
+                <input type="hidden" name="token" value="{{ token }}">
+                <input type="hidden" name="lang" value="{{ current_lang }}">
+
+                <div class="form-group">
+                    <label>Telegram Токен</label>
+                    <input type="text" name="new_token" value="{{ bot_info.token }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Комментарий к токену</label>
+                    <input type="text" name="new_comment" value="{{ bot_info.comment }}">
+                </div>
+
+                <div class="form-group">
+                    <label>Ссылка на бота</label>
+                    <input type="text" name="new_link" value="{{ bot_info.link }}">
+                </div>
+
+                <div class="form-group">
+                    <label>Базовый пресет</label>
+                    {% if is_admin_bot %}
+                    <input type="text" value="{{ preset_id }}" readonly style="background: #f0f0f0; cursor: not-allowed;">
+                    <input type="hidden" name="preset" value="{{ preset_id }}">
+                    <p style="font-size: 13px; color: #8d949e; margin-top: 5px;">Пресет для админ-бота не изменяется</p>
+                    {% else %}
+                    <select name="preset" required>
+                        {% for pid, pdata in presets.items() %}
+                        <option value="{{ pid }}" {% if pid == bot_info.preset %}selected{% endif %}>{{ pdata.name }}</option>
+                        {% endfor %}
+                    </select>
+                    {% endif %}
+                </div>
+
+                <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+                    <input type="checkbox" name="is_test" id="is_test_edit" value="true" style="width: auto;" {% if bot_info.is_test %}checked{% endif %}>
+                    <label for="is_test_edit" style="margin: 0;">Тестовый режим (тестовая БД и Юкасса)</label>
+                </div>
+
+                <div class="form-group">
+                    <label>Зафиксировать язык</label>
+                    <select name="fixed_lang">
+                        <option value="auto" {% if bot_info.get('fixed_lang') == 'auto' or not bot_info.get('fixed_lang') %}selected{% endif %}>Авто (по настройкам пользователя)</option>
+                        <option value="ru" {% if bot_info.get('fixed_lang') == 'ru' %}selected{% endif %}>Русский (RU)</option>
+                        <option value="en" {% if bot_info.get('fixed_lang') == 'en' %}selected{% endif %}>English (EN)</option>
+                        <option value="es" {% if bot_info.get('fixed_lang') == 'es' %}selected{% endif %}>Español (ES)</option>
+                    </select>
+                </div>
+
+                <div id="test_yookassa_fields" style="display: {% if bot_info.is_test %}block{% else %}none{% endif %}; background: #fff5f5; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #feb2b2;">
+                    <h3 style="margin-top: 0; font-size: 16px; color: #c53030;">Настройки тестовой Юкассы</h3>
+                    <div class="form-group">
+                        <label>Test Shop ID</label>
+                        <input type="text" name="yookassa_shop_id_test" value="{{ env_vars.get('YOOKASSA_SHOP_ID_TEST', '') }}">
+                    </div>
+                    <div class="form-group">
+                        <label>Test Secret Key</label>
+                        <input type="text" name="yookassa_secret_key_test" value="{{ env_vars.get('YOOKASSA_SECRET_KEY_TEST', '') }}">
+                    </div>
+                    <p style="font-size: 12px; color: #718096; margin: 0;">Эти ключи будут использоваться только при включенном тестовом режиме.</p>
+                </div>
+
+                <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;">
+
+                {% if not is_clone and not is_admin_bot %}
+                <h2>Редактирование реплик</h2>
+                <div class="lang-tabs">
+                    <a href="?token={{ token }}&lang=ru" class="tab {% if current_lang == 'ru' %}active{% endif %}">RU</a>
+                    <a href="?token={{ token }}&lang=en" class="tab {% if current_lang == 'en' %}active{% endif %}">EN</a>
+                    <a href="?token={{ token }}&lang=es" class="tab {% if current_lang == 'es' %}active{% endif %}">ES</a>
+                </div>
+
+                {% for key, desc in config.items() %}
+                <div class="form-group">
+                    <label>{{ desc }}</label>
+                    {% set val = all_messages[current_lang][key] if current_lang in all_messages and key in all_messages[current_lang] else '' %}
+                    
+                    {% if '(список)' in desc %}
+                        <div class="field-desc">Каждая фраза с новой строки</div>
+                        <textarea name="msg_{{ key }}">{% if val is iterable and val is not string %}{{ val|join('\n') }}{% else %}{{ val }}{% endif %}</textarea>
+                    {% else %}
+                        <textarea name="msg_{{ key }}">{{ val }}</textarea>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                {% elif is_admin_bot %}
+                <div style="background: #e3f2fd; color: #1565c0; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    ℹ️ Это админ-бот. Редактирование реплик недоступно для этого типа бота.
+                </div>
+                {% else %}
+                <div style="background: #fff3cd; color: #856404; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    ℹ️ Это бот-клон. Редактирование реплик доступно только в основном боте-пресете.
+                </div>
+                {% endif %}
+
+                <button type="submit" class="btn-save">Сохранить изменения</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        document.getElementById('is_test_edit').addEventListener('change', function() {
+            document.getElementById('test_yookassa_fields').style.display = this.checked ? 'block' : 'none';
+        });
+    </script>
+</body>
+</html>

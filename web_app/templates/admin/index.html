@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Управление Ботами</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .bot-info { flex-grow: 1; }
+        .bot-name { font-size: 18px; font-weight: bold; color: #1c1e21; margin-bottom: 5px; cursor: pointer; }
+        .bot-name:hover { color: #007bff; text-decoration: underline; }
+        .bot-meta { font-size: 14px; color: #65676b; }
+        .status { padding: 4px 12px; border-radius: 15px; font-size: 12px; font-weight: bold; }
+        .Running { background: #e7f3ff; color: #1877f2; }
+        .Stopped { background: #f2f3f5; color: #65676b; }
+        .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; font-size: 14px; }
+        .btn-start { background: #42b72a; color: white; margin-right: 5px; }
+        .btn-stop { background: #fa3e3e; color: white; margin-right: 5px; }
+        .btn-add { background: #1877f2; color: white; padding: 12px 24px; }
+        
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
+        .modal-content { background: white; margin: 10% auto; padding: 30px; border-radius: 12px; width: 450px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        select, input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        .btn-group { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-cancel { background: #e4e6eb; color: #050505; flex: 1; }
+        .btn-submit { background: #1877f2; color: white; flex: 2; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Мои Боты</h1>
+            <button class="btn btn-add" onclick="openModal()">+ Запустить нового бота</button>
+        </div>
+
+        {% if request.query_params.get('error') == 'token_in_use' %}
+        <div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #f5c6cb;">
+            ⚠️ Ошибка: Этот токен уже используется другим запущенным ботом!
+        </div>
+        {% endif %}
+
+        {% for bot in bots %}
+        <div class="card">
+            <div class="bot-info">
+                <div class="bot-name" onclick="location.href='/admin/bot/{{ bot.id }}?token={{ token }}'">
+                    {{ bot.name }}
+                </div>
+                <div class="bot-meta">
+                    {{ bot.comment }} • <a href="{{ bot.link }}" target="_blank" style="color: #1877f2; text-decoration: none;">{{ bot.link }}</a>
+                    {% if bot.is_test %}
+                    <br><span style="color: #dc3545; font-size: 11px; font-weight: bold;">[ТЕСТОВЫЙ РЕЖИМ]</span>
+                    {% endif %}
+                    {% if bot.fixed_lang and bot.fixed_lang != 'auto' %}
+                    <br><span style="color: #28a745; font-size: 11px; font-weight: bold;">[ЯЗЫК: {{ bot.fixed_lang|upper }}]</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <span class="status {{ bot.status }}">
+                    {{ 'ЗАПУЩЕН' if bot.status == 'Running' else 'ОСТАНОВЛЕН' }}
+                </span>
+                
+                <form action="/admin/bot/action" method="post" style="display: inline;">
+                    <input type="hidden" name="bot_id" value="{{ bot.id }}">
+                    <input type="hidden" name="token" value="{{ token }}">
+                    {% if bot.status == 'Stopped' %}
+                        <input type="hidden" name="action" value="start">
+                        <button type="submit" class="btn btn-start">Запустить</button>
+                    {% else %}
+                        <input type="hidden" name="action" value="stop">
+                        <button type="submit" class="btn btn-stop">Остановить</button>
+                    {% endif %}
+                </form>
+
+                {% if bot.id.startswith('clone_') %}
+                <form action="/admin/bot/delete" method="post" style="display: inline;" onsubmit="return confirm('Удалить этого бота?')">
+                    <input type="hidden" name="bot_id" value="{{ bot.id }}">
+                    <input type="hidden" name="token" value="{{ token }}">
+                    <button type="submit" class="btn btn-stop" style="background: #65676b;">Удалить</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Модальное окно создания -->
+    <div id="cloneModal" class="modal">
+        <div class="modal-content">
+            <h2>Запуск нового бота</h2>
+            <form action="/admin/bot/clone" method="post">
+                <input type="hidden" name="token" value="{{ token }}">
+                
+                <div class="form-group">
+                    <label>Выберите пресет (базу)</label>
+                    <select name="preset" required>
+                        {% for pid, pdata in presets.items() %}
+                        <option value="{{ pid }}">{{ pdata.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Выберите токен из Book1.csv</label>
+                    <select name="selected_token" required>
+                        {% for t in available_tokens %}
+                        <option value="{{ t.token }}">{{ t.comment }} ({{ t.token[:10] }}...)</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+                    <input type="checkbox" name="is_test" id="is_test" style="width: auto;">
+                    <label for="is_test" style="margin: 0;">Запустить в тестовом режиме (тестовая БД и Юкасса)</label>
+                </div>
+
+                <div class="form-group">
+                    <label>Зафиксировать язык</label>
+                    <select name="fixed_lang">
+                        <option value="auto">Авто (по настройкам пользователя)</option>
+                        <option value="ru">Русский (RU)</option>
+                        <option value="en">English (EN)</option>
+                        <option value="es">Español (ES)</option>
+                    </select>
+                </div>
+
+                <div class="btn-group">
+                    <button type="button" class="btn btn-cancel" onclick="closeModal()">Отмена</button>
+                    <button type="submit" class="btn btn-submit">Создать и запустить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openModal() { document.getElementById('cloneModal').style.display = 'block'; }
+        function closeModal() { document.getElementById('cloneModal').style.display = 'none'; }
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('cloneModal')) closeModal();
+        }
+    </script>
+</body>
+</html>

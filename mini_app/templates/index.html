@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#2D1B4E">
+    <title>Мистические услуги</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>✨ Мистические услуги</h1>
+            <div class="balance" id="balance">
+                <span class="spark-icon">💎</span>
+                <span id="balanceValue">—</span>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="welcome-section">
+                <p class="welcome-text">
+                    Добро пожаловать в мир тайн и мистики!<br>
+                    Выберите услугу:
+                </p>
+            </div>
+
+            <div class="services-grid">
+                <a href="/numerology" class="service-card">
+                    <div class="service-icon">🔮</div>
+                    <h2>Нумерология</h2>
+                    <p>Получите персональный нумерологический отчет</p>
+                    <div class="service-cost">5 искр</div>
+                </a>
+
+                <a href="/sonnik" class="service-card">
+                    <div class="service-icon">🌙</div>
+                    <h2>Толкование снов</h2>
+                    <p>Расшифруйте значение вашего сна</p>
+                    <div class="service-cost">5 искр</div>
+                </a>
+
+                <a href="/compatibility" class="service-card">
+                    <div class="service-icon">💞</div>
+                    <h2>Совместимость</h2>
+                    <p>Узнайте совместимость по именам и датам рождения</p>
+                    <div class="service-cost">5 искр</div>
+                </a>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Инициализация Telegram Web App
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+
+        // Получение данных пользователя
+        const initData = tg.initDataUnsafe;
+        const userId = initData?.user?.id;
+
+        // Загрузка баланса
+        async function loadBalance() {
+            if (!userId) {
+                document.getElementById('balanceValue').textContent = '—';
+                return;
+            }
+
+            try {
+                const formData = new FormData();
+                formData.append('telegram_id', userId);
+                
+                const response = await fetch('/api/balance', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                document.getElementById('balanceValue').textContent = data.balance || 0;
+            } catch (error) {
+                console.error('Error loading balance:', error);
+            }
+        }
+
+        if (userId) {
+            loadBalance();
+        }
+    </script>
+</body>
+</html>
