@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админка — Mini App</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: system-ui, sans-serif; margin: 20px; background: #1a1a2e; color: #eee; }
+        h1 { color: #a78bfa; }
+        .stats { margin-bottom: 1rem; opacity: 0.9; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #333; }
+        th { background: #2d2d44; color: #a78bfa; }
+        tr:hover { background: #252538; }
+        .credits { font-weight: 600; color: #fbbf24; }
+        .back { display: inline-block; margin-bottom: 1rem; color: #a78bfa; text-decoration: none; }
+        .back:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <a class="back" href="/">← На сайт</a>
+    <h1>Админка Mini App</h1>
+    <p class="stats">Пользователей: {{ total }}</p>
+    <table>
+        <thead>
+            <tr>
+                <th>Telegram ID</th>
+                <th>Username</th>
+                <th>Искры</th>
+                <th>Дата регистрации</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in users %}
+            <tr>
+                <td>{{ u.telegram_id }}</td>
+                <td>{{ u.username or "—" }}</td>
+                <td class="credits">{{ u.credits }}</td>
+                <td>{{ u.created_at.strftime("%d.%m.%Y %H:%M") if u.created_at else "—" }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4">Нет пользователей</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

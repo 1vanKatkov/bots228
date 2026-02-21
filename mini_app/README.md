@@ -79,6 +79,23 @@ docker-compose up -d
 
 Amvera автоматически определит конфигурацию из `amvera.yml` или `Dockerfile`.
 
+### Render (бот на хостинге + общая БД)
+
+В корне репозитория есть `render.yaml`: при деплое через Blueprint создаются два сервиса — **Web Service** (сайт Mini App) и **Background Worker** (бот @astrolhub_bot). Оба используют одну БД: сайт пишет пользователей и искры, бот дергает API сайта — данные общие.
+
+**Переменные окружения** (задать в Dashboard для обоих сервисов, где нужно):
+- `DATABASE_URL` — Postgres (для Web Service)
+- `OPENROUTER_API_KEY` — для нумерологии/сонника
+- `ASTROLHUB_BOT_TOKEN` — токен бота Mini App
+- `MINI_APP_URL` — URL сайта (для воркера бота), например `https://bots228.onrender.com`
+- `ADMIN_TOKEN` — секрет для доступа в админку (придумайте свой)
+
+**Админка на хостинге:** откройте в браузере:
+```
+https://ВАШ-САЙТ.onrender.com/admin?token=ВАШ_ADMIN_TOKEN
+```
+Показывается список пользователей (telegram_id, username, искры, дата регистрации).
+
 ### Другие платформы
 
 Подробные инструкции по деплою на другие платформы см. в [DEPLOY.md](DEPLOY.md)

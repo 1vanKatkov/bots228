@@ -13,7 +13,7 @@ from urllib.parse import urlparse, urlunparse, parse_qsl
 import asyncpg
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request, Form, HTTPException
+from fastapi import FastAPI, Request, Form, HTTPException, Query
 from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -66,6 +66,8 @@ SPARK_COST = 5
 
 # Токен бота для Mini App (для валидации initData)
 TELEGRAM_BOT_TOKEN = os.getenv("ASTROLHUB_BOT_TOKEN") or os.getenv("TELEGRAM_BOT_TOKEN") or ""
+# Секретный токен для доступа в админку: /admin?token=...
+ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "").strip()
 
 
 def _validate_telegram_init_data(init_data: str) -> Optional[int]:
@@ -253,6 +255,18 @@ async def get_user_balance(telegram_id: int) -> int:
         )
         return row['credits'] if row else STARTING_SPARKS
 
+
+async def get_all_users(limit: int = 500) -> list:
+    """Список пользователей для админки."""
+    pool = await get_db_pool()
+    async with pool.acquire() as conn:
+        rows = await conn.fetch(
+            "SELECT telegram_id, username, credits, created_at FROM users ORDER BY created_at DESC LIMIT $1",
+            limit,
+        )
+        return [dict(r) for r in rows]
+
+
 # Роуты
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
@@ -269,6 +283,19 @@ async def sonnik_page(request: Request):
 @app.get("/compatibility", response_class=HTMLResponse)
 async def compatibility_page(request: Request):
     return templates.TemplateResponse("compatibility.html", {"request": request})
+
+
+@app.get("/admin", response_class=HTMLResponse)
+async def admin_page(request: Request, token: Optional[str] = Query(default=None)):
+    """Админка: пользователи и балансы. Доступ: /admin?token=ВАШ_ADMIN_TOKEN (задаётся в ADMIN_TOKEN на хостинге)."""
+    if not ADMIN_TOKEN or token != ADMIN_TOKEN:
+        raise HTTPException(status_code=403, detail="Forbidden")
+    users = await get_all_users()
+    return templates.TemplateResponse(
+        "admin.html",
+        {"request": request, "users": users, "total": len(users)},
+    )
+
 
 @app.post("/api/balance")
 async def get_balance(

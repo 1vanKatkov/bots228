@@ -1,28 +1,41 @@
-# Render Blueprint: правильная конфигурация для bots228 (FastAPI)
-# Использование: Dashboard → New → Blueprint → подключите репозиторий, Render подхватит этот файл.
+# Render Blueprint: bots228 — сайт Mini App + бот на одном хостинге, общая БД
+# Dashboard → New → Blueprint → подключите репозиторий.
 
 services:
+  # Сайт Mini App (FastAPI)
   - type: web
     name: bots228
     runtime: python
     region: oregon
-
-    # Репозиторий и ветка
     repo: https://github.com/1vanKatkov/bots228
     branch: main
-
-    # Корень приложения — папка mini_app
     rootDir: mini_app
-
-    # Сборка: установка зависимостей
     buildCommand: pip install -r requirements.txt
-
-    # Запуск FastAPI (не Static Site)
     startCommand: python main.py
-
-    # Переменные задайте в Dashboard → Environment
     envVars:
       - key: DATABASE_URL
         sync: false
       - key: OPENROUTER_API_KEY
+        sync: false
+      - key: ASTROLHUB_BOT_TOKEN
+        sync: false
+      - key: ADMIN_TOKEN
+        sync: false
+
+  # Бот Mini App — та же БД (через API сайта), те же переменные
+  - type: worker
+    name: bots228-astrolhub-bot
+    runtime: python
+    region: oregon
+    repo: https://github.com/1vanKatkov/bots228
+    branch: main
+    rootDir: mini_app
+    buildCommand: pip install -r requirements.txt && pip install -r requirements-astrolhub-bot.txt
+    startCommand: python astrolhub_bot.py
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: ASTROLHUB_BOT_TOKEN
+        sync: false
+      - key: MINI_APP_URL
         sync: false
