@@ -242,8 +242,9 @@ async def compatibility_page(request: Request):
     return templates.TemplateResponse("compatibility.html", {"request": request})
 
 @app.post("/api/balance")
-async def get_balance(telegram_id: int = Form(...)):
-    balance = await get_user_balance(telegram_id)
+async def get_balance(telegram_id: int = Form(...), username: Optional[str] = Form(default=None)):
+    """Возвращает баланс. При первом обращении создаёт пользователя с 100 искрами (для бота и мини-приложения)."""
+    balance = await get_or_create_user(telegram_id, username or None)
     return JSONResponse({"balance": balance})
 
 @app.post("/api/numerology/generate")
